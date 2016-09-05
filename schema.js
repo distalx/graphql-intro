@@ -2,13 +2,23 @@ import {
   GraphQLSchema,
   GraphQLObjectType,
   GraphQLString,
-  GraphQLInt,
   GraphQLList,
-  GraphQLID,
-  GraphQLNonNull
 } from 'graphql/type';
 
 import albums from './albums.json';
+import images from './images.json';
+
+const ImageType = new GraphQLObjectType({
+  name: 'ImageType',
+  fields:{
+    id:{
+      type: GraphQLString
+    },
+    caption:{
+      type: GraphQLString
+    }
+  }
+});
 
 const AlbumType = new GraphQLObjectType({
   name: 'AlbumType',
@@ -20,15 +30,32 @@ const AlbumType = new GraphQLObjectType({
       type: GraphQLString
     },
     images: {
-      type: GraphQLString
+      type: new GraphQLList(ImageType),
+      resolve: (album)=>{
+
+
+        return album.images.filter((albumImageId)=>{
+
+          return images.filter((img)=>{
+            if(img.id === albumImageId){
+              return img;
+            }
+          });
+
+        });
+
+
+      }
     }
 
   }
 });
 
+
 const RootType = new GraphQLObjectType({
   name: 'ImageGallery',
   fields: {
+
     albums: {
       type: new GraphQLList(AlbumType),
       resolve() {
